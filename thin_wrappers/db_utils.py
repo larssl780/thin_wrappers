@@ -130,7 +130,8 @@ def read_sql_table(table_name, db='xxx.sqlite', force_no_alchemy=False, check_ex
     
     if __alchemy_installed and not force_no_alchemy:
         engine = create_db_engine(db, check_exists=check_exists)
-        if not engine.has_table(table_name):
+        insp = inspect(engine)
+        if not insp.has_table(table_name):
             print("Table '%s' not found in %s!" % (table_name, db))
             return pd.DataFrame()
         else:
