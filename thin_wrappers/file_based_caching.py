@@ -64,6 +64,8 @@ def current_function_name(idx=1):
 
 def create_cache_key(args, func_name=None, **kwargs):
     """Caller is responsible for checking path is not too long...
+    It's not straightforward to programmatically check the length (we can't just cut of the path at element x, 
+        since we could then run the risk of returning different rvs for different arguments...)
     """
 
     if func_name is None:
