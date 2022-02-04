@@ -1,12 +1,23 @@
 import pytest
-
-import ../thin_wrappers/db_utils as db
+import pathlib
+import sys
+import db_utils as db
 import requests
 import io
 import zipfile
 import tempfile
 import pandas as pd
 import os
+HERE = pathlib.Path(__file__).resolve().parent
+
+
+
+# insert at 1, 0 is the script path (or '' in REPL)
+# temporary hack until package is published and we can inherit from there:
+
+sys.path.insert(1, '%s/thin_wrappers' % HERE.parent)
+
+
 
 
 def headers():
