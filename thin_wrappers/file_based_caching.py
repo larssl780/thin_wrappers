@@ -76,5 +76,6 @@ def create_cache_key(args, func_name=None, **kwargs):
             path += '|%s' % str(el)
     for value in kwargs.values():
         path += '|%s' % str(value)
-    # print("cache-key: '%s'" % path)
+
+    assert len(path) <= 255, "Path used for caching is likely too long, pls consider using session-based-caching instead (no cache key length restrictions!)"
     return path

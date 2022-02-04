@@ -13,7 +13,7 @@ import zipfile
 import io
 import pandas as pd
 import time
-
+import unittest
 
 HERE = pathlib.Path(__file__).resolve().parent
 
@@ -24,6 +24,7 @@ HERE = pathlib.Path(__file__).resolve().parent
 
 sys.path.insert(1, '%s/thin_wrappers' % HERE.parent)
 import file_based_caching as fcache  # NOQA: E402
+
 
 def headers():
     return {'Accept': 'application/json, text/plain, */*',
@@ -63,6 +64,18 @@ def dummy_function(refresh=False):
     return datum
 
 
+def cache_key_length():
+    """Ensure module fails if we try to use very long path name
+    """
+
+    # ck_input = dict(zip(np.repeat('testing', 40), None))
+    dummy_args = {}
+    for i in range(40):
+        dummy_args[i] = 'testing'
+
+    fcache.create_cache_key(dummy_args, fcache.current_function_name())
+
+    
 def test_cache():
     """Test that the caching function writes to the file first time we call it, 
     and also that we rewrite the file when we ask it to.
@@ -77,6 +90,10 @@ def test_cache():
     mmtime = os.path.getmtime('py_function_cache/dummy_function')
     assert mmtime > mtime, "Cached data hasn't been refreshed!? (orig mtime = '%s', new mtime = '%s')" % (pd.to_datetime(mtime, unit='s'), pd.to_datetime(mmtime, unit='s'))
 
+    tmp = unittest.TestCase()
+
+    with tmp.assertRaises(AssertionError):
+        cache_key_length()
 
 
 if __name__ == '__main__':
