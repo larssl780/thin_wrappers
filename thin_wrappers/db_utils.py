@@ -27,8 +27,8 @@ def create_db_engine(db='xxx.sqlite', check_exists=True):
 def table_exists(table_name, db='xxx.sqlite'):
     if __alchemy_installed:
         engine = create_db_engine(db)
-        insp = inspect(engine)
-        return insp.has_table(table_name)
+        return engine_has_table(engine, table_name)
+        
     else:
         raise NotImplementedError("Can't do this yet without sqlalchemy")
 
@@ -122,6 +122,10 @@ def _convert_query_result_to_df(query, db, return_array=False, return_single_val
     return pd.DataFrame(df_in, columns=cols)
 
 
+def engine_has_table(engine, table_name):
+    insp = inspect(engine)
+    tables = insp.get_table_names()
+    return table_name in tables
 def read_sql_table(table_name, db='xxx.sqlite', force_no_alchemy=False, check_exists=True):
     """
     wrapper around pandas function
@@ -130,8 +134,9 @@ def read_sql_table(table_name, db='xxx.sqlite', force_no_alchemy=False, check_ex
     
     if __alchemy_installed and not force_no_alchemy:
         engine = create_db_engine(db, check_exists=check_exists)
-        insp = inspect(engine)
-        if not insp.has_table(table_name):
+        
+        
+        if not engine_has_table(engine, table_name):
             print("Table '%s' not found in %s!" % (table_name, db))
             return pd.DataFrame()
         else:
