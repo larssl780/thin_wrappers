@@ -1,9 +1,6 @@
 import pytest
 
-try:
-    from core_analytics.data_handling import db_utils as db
-except:
-    import db_utils as db
+import ../thin_wrappers/db_utils as db
 import requests
 import io
 import zipfile
