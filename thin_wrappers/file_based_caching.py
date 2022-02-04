@@ -63,6 +63,8 @@ def current_function_name(idx=1):
 
 
 def create_cache_key(args, func_name=None, **kwargs):
+    """Caller is responsible for checking path is not too long...
+    """
 
     if func_name is None:
         func_name = current_function_name(2)
