@@ -2,12 +2,12 @@ import pdb # NOQA F401
 import copy
 import os
 import sqlite3
-import pandas as pd
+import pandas as pd 
 
 __alchemy_installed = True
 try:
-    from sqlalchemy import create_engine
-    
+    from sqlalchemy import create_engine, inspect
+    # from sqlalchemy.engine.reflection import Inspector
 except:
     __alchemy_installed = False
 
@@ -27,7 +27,8 @@ def create_db_engine(db='xxx.sqlite', check_exists=True):
 def table_exists(table_name, db='xxx.sqlite'):
     if __alchemy_installed:
         engine = create_db_engine(db)
-        return engine.has_table(table_name)
+        insp = inspect(engine)
+        return insp.has_table(table_name)
     else:
         raise NotImplementedError("Can't do this yet without sqlalchemy")
 
