@@ -1,4 +1,6 @@
 import pytest
+import pathlib
+import sys
 
 import requests
 import io
@@ -6,10 +8,15 @@ import zipfile
 import tempfile
 import pandas as pd
 import os
+HERE = pathlib.Path(__file__).resolve().parent
 
 
-from thin_wrappers import db_utils as db
 
+# insert at 1, 0 is the script path (or '' in REPL)
+# temporary hack until package is published and we can inherit from there:
+
+sys.path.insert(1, '%s/thin_wrappers' % HERE.parent)
+import db_utils as db  # NOQA: E402
 
 
 
