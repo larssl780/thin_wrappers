@@ -1,7 +1,7 @@
 import pytest
 import pathlib
 import sys
-import db_utils as db
+
 import requests
 import io
 import zipfile
@@ -16,7 +16,7 @@ HERE = pathlib.Path(__file__).resolve().parent
 # temporary hack until package is published and we can inherit from there:
 
 sys.path.insert(1, '%s/thin_wrappers' % HERE.parent)
-
+import db_utils as db  # NOQA: E402
 
 
 
