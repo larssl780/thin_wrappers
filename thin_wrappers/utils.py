@@ -150,3 +150,28 @@ def _get_request_from_session(session=None, url=None, headers=None):
         return requests.get(url, headers=headers)
     else:
         return session.get(url, headers=headers)
+
+
+def uk_holidays(refresh=False):
+    if refresh:
+        _uk_holidays.cache_clear()
+    return _uk_holidays()
+
+
+@lru_cache(maxsize=None)
+def _uk_holidays():
+    """gov.uk address here (doesn't go back very far in time): https://www.gov.uk/bank-holidays.json
+    """
+    url = 'https://raw.githubusercontent.com/ministryofjustice/govuk-bank-holidays/main/govuk_bank_holidays/bank-holidays.json'
+
+    data = requests.get(url).json()
+    dates = pd.to_datetime([x['date']
+                            for x in data['england-and-wales']['events']])
+    return dates
+
+
+def date_range(start_date, end_date, cal='uk', closed=None, refresh=False):
+    if cal != 'uk':
+        raise NotImplementedError("Only uk calendar implemented so far!")
+
+    return pd.bdate_range(start_date, end_date, holidays=uk_holidays(refresh=refresh), freq='C', closed=closed)
