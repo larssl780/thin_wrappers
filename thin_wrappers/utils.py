@@ -7,6 +7,10 @@ import webbrowser
 from functools import lru_cache
 import zipfile
 import requests
+import datetime
+import bisect
+import re
+import numpy as np
 
 
 def query_yes_no(question, default="yes"):
@@ -108,9 +112,13 @@ def display_sortable_table(df, title='', header_size=1, filename=None, sort_on_c
 
             tmp.write(raw)
 
-            webbrowser.open('file://%s' % tmp.name)
+            return open_path_in_browser(tmp.name)
         except:
             print("Not able to fire up browser, are you running in colab per chance?")
+
+
+def open_path_in_browser(path):
+    return webbrowser.open('file://' + path)
 
 
 def download_and_save_zipped_excel_data_to_file(url='', tab_name='', refresh=False):
@@ -175,3 +183,61 @@ def date_range(start_date, end_date, cal='uk', closed=None, refresh=False):
         raise NotImplementedError("Only uk calendar implemented so far!")
 
     return pd.bdate_range(start_date, end_date, holidays=uk_holidays(refresh=refresh), freq='C', closed=closed)
+
+
+def serial_date_to_datetime(ordinal, epoch=datetime.datetime(1900, 1, 1), as_time_stamps=True):
+    if ordinal > 59:
+        ordinal -= 1  # Excel leap year bug, 1900 is not a leap year!
+    inDays = int(ordinal)
+    frac = ordinal - inDays
+    inSecs = int(round(frac * 86400.0))
+
+    if as_time_stamps:
+        return pd.to_datetime(epoch + datetime.timedelta(days=inDays - 1, seconds=inSecs))
+    return epoch + datetime.timedelta(days=inDays - 1, seconds=inSecs)
+
+
+def interpolate(a, b, sort=False, return_first_lower=True):
+    # if b is in list a, return its idx, else return idx of element smaller than b
+    if sort is True:
+        a.sort()
+    if b in a:
+        return a.index(b)
+    elif return_first_lower:
+        return bisect.bisect_left(a, b) - 1
+    else:
+        return bisect.bisect_left(a, b)
+
+
+def find_all_indicies(line='', tag='', case=False, use_regex=True):
+    """
+    sometimes when you're searching for eg. html tags it can be cumbersome to escape everything in regex
+    """
+    if use_regex:
+        if not case:
+            return [m.start() for m in re.finditer(tag, line, re.IGNORECASE)]
+        else:
+            return [m.start() for m in re.finditer(tag, line)]
+    else:
+        raise NotImplementedError("Could try re.escape(*) here maybe?")
+
+
+def big_fmt(val):
+    """
+    format with thousandsd separator
+    """
+    if pd.isnull(val):
+        return 'n/a'
+
+    if isinstance(val, str):
+        return val
+
+    return '{:,}'.format(int(round(val, 0))).strip()
+
+
+def value_is_numeric_type(X):
+    X = np.asanyarray(X)
+
+    if (X.dtype.char in np.typecodes['AllFloat']) or (X.dtype.char in np.typecodes['Integer']):  # noqa: E501
+        return True
+    return False
