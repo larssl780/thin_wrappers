@@ -10,7 +10,7 @@ README = (HERE / "README.md").read_text()
 # This call to setup() does all the work
 setup(
     name="thin_wrappers",
-    version="0.4.3",
+    version="0.4.4",
     description="Thin wrappers around common packages",
     long_description=README,
     long_description_content_type="text/markdown",
@@ -25,7 +25,7 @@ setup(
     ],
     packages=["thin_wrappers"],
     include_package_data=True,
-    install_requires=["pandas", 'requests', 'SQLAlchemy', 'pickleshare'],
+    install_requires=['pickleshare'],
     # entry_points={
     #     "console_scripts": [
     #         "realpython=reader.__main__:main",
