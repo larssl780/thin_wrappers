@@ -13,6 +13,18 @@ import re
 import numpy as np
 
 
+def year_frac(dt1, dt2):
+    if isinstance(dt1, str):
+        dt1 = pd.to_datetime(dt1)
+    elif isinstance(dt1, pd.Timestamp):
+        dt1 = dt1.normalize()
+    if isinstance(dt2, str):
+        dt2 = pd.to_datetime(dt2)
+    elif isinstance(dt2, pd.Timestamp):
+        dt2 = dt2.normalize()
+    return (dt2 - dt1) / np.timedelta64(1, 'D')
+
+
 def query_yes_no(question, default="yes"):
     """(this is copied from somewhere, )
     Ask a yes/no question via raw_input() and return their answer.
@@ -241,3 +253,27 @@ def value_is_numeric_type(X):
     if (X.dtype.char in np.typecodes['AllFloat']) or (X.dtype.char in np.typecodes['Integer']):  # noqa: E501
         return True
     return False
+
+
+def strictly_increasing(L):
+    """Copied from accepted answer to this: 
+    https://stackoverflow.com/questions/4983258/python-how-to-check-list-monotonicity
+    """
+
+    return all(x < y for x, y in zip(L, L[1:]))
+
+
+def strictly_decreasing(L):
+    return all(x > y for x, y in zip(L, L[1:]))
+
+
+def non_increasing(L):
+    return all(x >= y for x, y in zip(L, L[1:]))
+
+
+def non_decreasing(L):
+    return all(x <= y for x, y in zip(L, L[1:]))
+
+
+def monotonic(L):
+    return non_increasing(L) or non_decreasing(L)
