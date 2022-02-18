@@ -22,7 +22,7 @@ def year_frac(dt1, dt2):
         dt2 = pd.to_datetime(dt2)
     elif isinstance(dt2, pd.Timestamp):
         dt2 = dt2.normalize()
-    return (dt2 - dt1) / np.timedelta64(1, 'D')
+    return (dt2 - dt1) / np.timedelta64(1, 'Y')
 
 
 def query_yes_no(question, default="yes"):
