@@ -277,3 +277,19 @@ def non_decreasing(L):
 
 def monotonic(L):
     return non_increasing(L) or non_decreasing(L)
+
+
+def syncsort(a, b):
+    """
+    sorts a in ascending order (and b will tag along, so each element of b is still associated with the right element in a)
+
+    """
+    a, b = (list(t) for t in zip(*sorted(zip(a, b))))
+    return a, b
+
+
+def string_col_to_unique_components(df, col_name, separator='|'):
+    """If you have a column stored as strings, eg. 'player1|player2|player3'
+    returns a flat array with unique values
+    """
+    return np.unique(df[col_name].str.split('|', expand=True).values.ravel())
