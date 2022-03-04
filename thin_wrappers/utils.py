@@ -292,4 +292,4 @@ def string_col_to_unique_components(df, col_name, separator='|'):
     """If you have a column stored as strings, eg. 'player1|player2|player3'
     returns a flat array with unique values
     """
-    return np.unique(df[col_name].str.split('|', expand=True).values.ravel())
+    return np.unique(df[col_name].str.split(separator, expand=True).values.ravel())
