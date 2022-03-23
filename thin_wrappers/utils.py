@@ -11,6 +11,7 @@ import datetime
 import bisect
 import re
 import numpy as np
+import plotly.express as pex
 
 
 def year_frac(dt1, dt2):
@@ -293,3 +294,45 @@ def string_col_to_unique_components(df, col_name, separator='|'):
     returns a flat array with unique values
     """
     return np.unique(df[col_name].str.split(separator, expand=True).values.ravel())
+
+
+def rolling_window(a, window):
+    """
+    this is built-in in later versions of numpy
+    """
+    shape = a.shape[:-1] + (a.shape[-1] - window + 1, window)
+    strides = a.strides + (a.strides[-1],)
+    return np.lib.stride_tricks.as_strided(a, shape=shape, strides=strides)
+
+
+def plot_df(df, plot_these=None, normalize=True, title=None, yaxis_title=None):
+    """
+    plotly express is awkward when it comes to plotting very basic stuff, for some reason
+
+    assume the df has a proper datetime index (any way to check?)
+    if plot_these is None, plot all but the index, m'kay?
+    """
+    idx_name = df.index.name
+    
+    df = df.copy()
+    # convert to long format:
+    if plot_these is None:
+        vv = list(set(df.columns) - set([idx_name]))
+    else:
+        vv = plot_these
+    if normalize:
+        df.dropna(inplace=True)
+        # have to drop na , otherwise we risk dividing by na
+        df = df / df.iloc[0, :]
+    
+    df_long = df.reset_index().melt(id_vars=[idx_name], value_vars=vv)
+    if title is None:
+        fig = pex.line(df_long, x=idx_name, y='value', color='variable')
+
+    else:
+        fig = pex.line(df_long, x=idx_name, y='value',
+                       color='variable', title=title)
+
+    if yaxis_title is not None:
+        fig.update_layout(yaxis_title=yaxis_title)
+    fig.show()
