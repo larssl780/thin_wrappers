@@ -622,3 +622,31 @@ def file_finder(folder, pattern, case=False, return_last_file=False):
     if return_last_file:
         return df.iloc[-1].file
     return df
+
+
+def read_file_as_string(filename):
+    with open(filename, 'r') as fil:
+        return fil.read()
+
+
+def extract_text_from_pdf(url="", session=None, start_page=None, end_page=None, refresh=False):
+    """Depends on ghostview being installed
+    """
+
+    res = get_request_from_session(url=url, session=session, refresh=refresh)
+
+    with open('temptemp.pdf', 'wb') as fp:
+        fp.write(res.content)
+
+    tmp = tempfile.NamedTemporaryFile(delete=False)
+    base_cmd = "gs -sDEVICE=txtwrite"
+    if isinstance(start_page, int):
+        base_cmd += ' -dFirstPage=%d' % start_page
+    if isinstance(end_page, int):
+        base_cmd += ' -dLastPage=%d' % end_page
+    full_cmd = "%s  -o %s 'temptemp.pdf'" % (base_cmd, tmp.name)
+
+    _ = os.popen(full_cmd).read()
+    tmp = read_file_as_string(tmp.name)
+
+    return tmp
