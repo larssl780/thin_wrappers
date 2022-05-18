@@ -468,15 +468,15 @@ def rolling(
         Rolling window matrix or generator
     Examples
     --------
-    >>> rolling(np.array([1, 2, 3, 4, 5]), 2, as_array=True)
+    rolling(np.array([1, 2, 3, 4, 5]), 2, as_array=True)
     array([[nan,  1.],
            [ 1.,  2.],
            [ 2.,  3.],
            [ 3.,  4.],
            [ 4.,  5.]])
     Usage with numpy functions
-    >>> arr = rolling(np.array([1, 2, 3, 4, 5]), 2, as_array=True)
-    >>> np.sum(arr, axis=1)
+    arr = rolling(np.array([1, 2, 3, 4, 5]), 2, as_array=True)
+    np.sum(arr, axis=1)
     array([nan,  3.,  5.,  7.,  9.])
     """
     if not any(isinstance(window, t) for t in [int, np.integer]):
@@ -650,3 +650,103 @@ def extract_text_from_pdf(url="", session=None, start_page=None, end_page=None, 
     tmp = read_file_as_string(tmp.name)
 
     return tmp
+
+
+def bst_start_date(dt=''):
+    """In the UK the clocks go forward 1 hour at 1am on the last Sunday in March, and back 1 hour at 2am on the last Sunday in October
+    https://www.gov.uk/when-do-the-clocks-change
+    >>> bst_start_date('30-oct-2023')
+    Timestamp('2023-03-26 00:00:00')
+
+    >>> bst_start_date('30-oct-2022')
+    Timestamp('2022-03-27 00:00:00')
+
+    >>> bst_start_date('30-oct-2020')
+    Timestamp('2020-03-29 00:00:00')
+
+    >>> bst_start_date('30-oct-2021')
+    Timestamp('2021-03-28 00:00:00')
+    """
+    if isinstance(dt, str):
+        if len(dt):
+            dt = pd.to_datetime(dt)
+        else:
+            dt = pd.to_datetime('today')
+    if not isinstance(dt, pd.Timestamp):
+        raise Exception("dt has to be str or timestamp!")
+
+    year = dt.year
+    dt = pd.to_datetime('%d-3-01' % year)
+    me = dt + pd.offsets.MonthEnd()
+    dt_name = me.day_name()
+
+    while dt_name != 'Sunday':
+        me += pd.DateOffset(days=-1)
+        dt_name = me.day_name()
+
+    return me
+
+
+def bst_end_date(dt=''):
+    """In the UK the clocks go forward 1 hour at 1am on the last Sunday in March, and back 1 hour at 2am on the last Sunday in October
+    https://www.gov.uk/when-do-the-clocks-change
+
+    >>> bst_end_date('30-oct-2023')
+    Timestamp('2023-10-29 00:00:00')
+
+    >>> bst_end_date('30-oct-2022')
+    Timestamp('2022-10-30 00:00:00')
+
+    >>> bst_end_date('30-oct-2020')
+    Timestamp('2020-10-25 00:00:00')
+
+    >>> bst_end_date('30-oct-2021')
+    Timestamp('2021-10-31 00:00:00')
+    """
+    if isinstance(dt, str):
+        if len(dt):
+            dt = pd.to_datetime(dt)
+        else:
+            dt = pd.to_datetime('today')
+    if not isinstance(dt, pd.Timestamp):
+        raise Exception("dt has to be str or timestamp!")
+
+    year = dt.year
+    dt = pd.to_datetime('%d-10-01' % year)
+    me = dt + pd.offsets.MonthEnd()
+    dt_name = me.day_name()
+
+    while dt_name != 'Sunday':
+        me += pd.DateOffset(days=-1)
+        dt_name = me.day_name()
+
+    return me
+
+
+def is_bst(dt=''):
+    """
+    Is it British Summer Time or not?
+
+
+    >>> is_bst('2022-01-10')
+    False
+
+    >>> is_bst('2022-05-18')
+    True
+    """
+
+    if isinstance(dt, str):
+        if len(dt):
+            dt = pd.to_datetime(dt)
+        else:
+            dt = pd.to_datetime('today')
+    if not isinstance(dt, pd.Timestamp):
+        raise Exception("dt has to be str or timestamp!")
+    lb = bst_start_date(dt)
+    ub = bst_end_date(dt)
+    return lb <= dt <= ub
+
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
